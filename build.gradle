@@ -6,6 +6,8 @@ plugins {
     id 'checkstyle'
 }
 
+group = 'com.fincher'
+
 gradlePlugin {
 	plugins {
 		release {
