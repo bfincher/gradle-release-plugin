@@ -11,6 +11,18 @@ pipeline {
 
     parameters {
         string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
+
+def call(Map config = [:]) {
+
+    paramsList = []
+
+    // You can also set the default value using the 'defaultValue' option
+    paramsList << extendedChoice(name: 'Perform Release', description: 'Select the type of release or leave blank for now release', 
+        type: 'PT_RADIO', 
+        value: 'Major,Minor,Patch', visibleItemCount: 5)
+
+    properties([parameters(paramsList)])
+}
     }
 
     tools {
