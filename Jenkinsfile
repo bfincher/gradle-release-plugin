@@ -7,33 +7,52 @@ properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKe
 disableConcurrentBuilds(), pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '1d']])])
 
 pipeline {
-    agent any
+  agent any
 
-    parameters {
-        string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
+  parameters {
+      string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
+      booleanParam(name: 'majorRelease', defaultValue: false, description: 'Perform a major release')
+      booleanParam(name: 'minorRelease', defaultValue: false, description: 'Perform a minor release')
+      booleanParam(name: 'patchRelease', defaultValue: false, description: 'Perform a patch release')
+  }
 
-def call(Map config = [:]) {
+  tools {
+    jdk 'jdk11'
+  }
 
-    paramsList = []
-
-    // You can also set the default value using the 'defaultValue' option
-    paramsList << extendedChoice(name: 'Perform Release', description: 'Select the type of release or leave blank for now release', 
-        type: 'PT_RADIO', 
-        value: 'Major,Minor,Patch', visibleItemCount: 5)
-
-    properties([parameters(paramsList)])
-}
-    }
-
-    tools {
-        jdk 'jdk11'
-    }
-
-    stages {
-        stage('Build') {
-            steps {
-                sh './gradlew clean build ' + gradleOpts
-            }
+  stages {
+    stage('PrepareBuild') {
+      steps {
+        def releaseOptionCount = 0;
+        if (!params.majorRelease.isEmpty()) {
+          performRelease = true
+          releaseOptionCount++
         }
+        if (!params.minorRelease.isEmpty()) {
+          performRelease = true
+          releaseOptionCount++
+        }
+        if (!params.patchRelease.isEmpty()) {
+          performRelease = true
+          releaseOptionCount++
+        }
+
+        if (releaseOptionCount > 0) {
+          error("Only one of major, minor, or patch release options can be selected"
+        }
+
+        if (!params.extraGradleOpts.isEmpty()) {
+          gradleOpts = gradleOpts + extraGradleOpts
+        }
+
+
+      }
     }
+
+    stage('Build') {
+      steps {
+        sh './gradlew clean build ' + gradleOpts
+      }
+    }
+  }
 }
