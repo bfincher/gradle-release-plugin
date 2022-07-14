@@ -23,29 +23,29 @@ pipeline {
   stages {
     stage('PrepareBuild') {
       steps {
-        def releaseOptionCount = 0;
-        if (!params.majorRelease.isEmpty()) {
-          performRelease = true
-          releaseOptionCount++
-        }
-        if (!params.minorRelease.isEmpty()) {
-          performRelease = true
-          releaseOptionCount++
-        }
-        if (!params.patchRelease.isEmpty()) {
-          performRelease = true
-          releaseOptionCount++
-        }
+        script {
+          def releaseOptionCount = 0;
+          if (!params.majorRelease.isEmpty()) {
+            performRelease = true
+            releaseOptionCount++
+          }
+          if (!params.minorRelease.isEmpty()) {
+            performRelease = true
+            releaseOptionCount++
+          }
+          if (!params.patchRelease.isEmpty()) {
+            performRelease = true
+            releaseOptionCount++
+          }
 
-        if (releaseOptionCount > 0) {
-          error("Only one of major, minor, or patch release options can be selected")
+          if (releaseOptionCount > 0) {
+            error("Only one of major, minor, or patch release options can be selected")
+          }
+
+          if (!params.extraGradleOpts.isEmpty()) {
+            gradleOpts = gradleOpts + extraGradleOpts
+          }
         }
-
-        if (!params.extraGradleOpts.isEmpty()) {
-          gradleOpts = gradleOpts + extraGradleOpts
-        }
-
-
       }
     }
 
