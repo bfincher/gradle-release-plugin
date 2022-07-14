@@ -38,7 +38,7 @@ pipeline {
         }
 
         if (releaseOptionCount > 0) {
-          error("Only one of major, minor, or patch release options can be selected"
+          error("Only one of major, minor, or patch release options can be selected")
         }
 
         if (!params.extraGradleOpts.isEmpty()) {
