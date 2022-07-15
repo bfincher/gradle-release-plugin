@@ -1,16 +1,20 @@
 package com.fincher.gradle.release;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -79,6 +83,86 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         task.setNewVersion("1.1.1");
         task.releaseTaskAction();
         verifyResults("1.1.1");
+    }
+
+    @Test
+    public void testUsernameNoPassword() {
+        task.getGitRepositoryUsername().set("username");
+        assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
+    }
+
+    @Test
+    public void testPasswordNoUsername() {
+        task.getGitRepositoryPassword().set("pw");
+        assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
+    }
+    
+    @Test
+    public void testUsernameWithSshKey() {
+        task.getGitRepositoryUsername().set("username");
+        task.getGitRepositoryPassword().set("pw");
+        task.getGitRepositorySshPrivateKey().set("key");
+        assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
+    }
+    
+    @Test
+    public void testUsernameWithSshKeyFile() {
+        task.getGitRepositoryUsername().set("username");
+        task.getGitRepositoryPassword().set("pw");
+        task.getGitRepositorySshPrivateKeyFile().set(new File("build.gradle"));
+        assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
+    }
+    
+    @Test
+    public void testUsernameWithSshPassphrase() {
+        task.getGitRepositoryUsername().set("username");
+        task.getGitRepositoryPassword().set("pw");
+        task.getGitRepositorySshPassphrase().set("passphrase");
+        assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
+    }
+    
+    @Test
+    public void testKeyAndKeyFile() {
+        task.getGitRepositorySshPrivateKey().set("key");
+        task.getGitRepositorySshPrivateKeyFile().set(new File("build.gradle"));
+        assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
+    }
+    
+    @Test
+    public void testPassphraseWithNoKey() {
+        task.getGitRepositorySshPassphrase().set("passphrase");
+        assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
+    }
+    
+    @Test
+    void testUsernamePassword() throws Exception {
+        task.getGitRepositoryUsername().set("user");
+        task.getGitRepositoryPassword().set("pw");
+        task.releaseTaskAction();        
+        
+        verify(pushCommand).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
+        verify(pushCommand, never()).setTransportConfigCallback(any());
+        verifyResults("0.0.3-SNAPSHOT");
+    }
+    
+    @Test
+    void testPrivateKey() throws Exception {
+        task.getGitRepositorySshPrivateKey().set("key");
+        task.releaseTaskAction();        
+        
+        verify(pushCommand, never()).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
+        verify(pushCommand).setTransportConfigCallback(any());
+        verifyResults("0.0.3-SNAPSHOT");
+    }
+    
+    @Test
+    void testPrivateKeyFile() throws Exception {
+        task.getGitRepositorySshPrivateKeyFile().set(new File("build.gradle"));
+        task.releaseTaskAction();        
+        
+        verify(pushCommand, never()).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
+        verify(pushCommand).setTransportConfigCallback(any());
+        verifyResults("0.0.3-SNAPSHOT");
     }
 
     private void verifyResults(String expectedVersion) throws Exception {

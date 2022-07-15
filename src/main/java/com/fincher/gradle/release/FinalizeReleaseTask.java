@@ -199,17 +199,17 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
                     "Both SSH private Key and username cannot be set");
             Preconditions.checkState(!isPasswordSet,
                     "Both SSH private Key and password cannot be set");
-            Preconditions.checkState(!isPrivateKeyPassphraseSet,
+            Preconditions.checkState(!isPrivateKeyFileSet,
                     "Both SSH private Key and SSH private key file parameters cannot be set");
             return;
         }
 
-        if (getGitRepositorySshPrivateKeyFile().isPresent()) {
-            Preconditions.checkState(!getGitRepositoryUsername().isPresent(),
+        if (isPrivateKeyFileSet) {
+            Preconditions.checkState(!isUsernameSet,
                     "Both SSH private Key and username cannot be set");
-            Preconditions.checkState(!getGitRepositoryPassword().isPresent(),
+            Preconditions.checkState(!isPasswordSet,
                     "Both SSH private Key and password cannot be set");
-            Preconditions.checkState(!getGitRepositorySshPrivateKey().isPresent(),
+            Preconditions.checkState(!isPrivateKeySet,
                     "Both SSH private Key and SSH private key file parameters cannot be set");
         }
     }
