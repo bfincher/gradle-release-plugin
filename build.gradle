@@ -4,14 +4,23 @@ plugins {
 	id "eclipse"
     id "com.diffplug.spotless" version "6.7.2"
     id 'checkstyle'
+    id 'com.gradle.plugin-publish' version '1.0.0'
 }
 
 group = 'com.fincher'
 
+pluginBundle {
+  website = 'https://github.com/bfincher/gradle-release-plugin'
+  vcsUrl = 'https://github.com/bfincher/gradle-release-plugin'
+  tags = ['release']
+}
+
 gradlePlugin {
 	plugins {
 		release {
-			id = "release"
+			id = "com.fincher.release"
+            displayName = 'Gradle release plugin'
+            description = 'A plugin to perform a release in 2 phases.  Allowing for a tag and publish to be performed before the new version is set'
 			implementationClass = "com.fincher.gradle.release.ReleasePlugin"
 		}
 	}
