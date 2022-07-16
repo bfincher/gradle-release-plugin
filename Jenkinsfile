@@ -25,15 +25,15 @@ pipeline {
       steps {
         script {
           def releaseOptionCount = 0;
-          if (!params.majorRelease.isEmpty()) {
+          if (params.majorRelease) {
             performRelease = true
             releaseOptionCount++
           }
-          if (!params.minorRelease.isEmpty()) {
+          if (params.minorRelease) {
             performRelease = true
             releaseOptionCount++
           }
-          if (!params.patchRelease.isEmpty()) {
+          if (params.patchRelease) {
             performRelease = true
             releaseOptionCount++
           }
