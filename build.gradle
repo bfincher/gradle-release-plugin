@@ -13,7 +13,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.fincher:gradle-release:0.0.3'
+        classpath 'com.fincher:gradle-release:0.0.4-SNAPSHOT'
     }
 }
 
@@ -24,8 +24,9 @@ plugins {
     id "com.diffplug.spotless" version "6.7.2"
     id 'checkstyle'
     id 'com.gradle.plugin-publish' version '1.0.0'
-//    id 'com.fincher.release' version '0.0.2'
 }
+
+apply plugin: 'com.fincher.release'
 
 group = 'com.fincher'
 
@@ -49,6 +50,12 @@ java {
 	toolchain {
     	languageVersion = JavaLanguageVersion.of(11)
 	}
+}
+
+release {
+  if (project.hasProperty('sshKeyFile')) {
+    gitRepositorySshPrivateKeyFile = file("${sshKeyFile}")
+  }
 }
 
 sourceSets {
