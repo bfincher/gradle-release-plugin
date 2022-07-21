@@ -96,7 +96,7 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         task.getGitRepositoryPassword().set("pw");
         assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
     }
-    
+
     @Test
     public void testUsernameWithSshKey() {
         task.getGitRepositoryUsername().set("username");
@@ -104,7 +104,7 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         task.getGitRepositorySshPrivateKey().set("key");
         assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
     }
-    
+
     @Test
     public void testUsernameWithSshKeyFile() {
         task.getGitRepositoryUsername().set("username");
@@ -112,7 +112,7 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         task.getGitRepositorySshPrivateKeyFile().set(new File("build.gradle"));
         assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
     }
-    
+
     @Test
     public void testUsernameWithSshPassphrase() {
         task.getGitRepositoryUsername().set("username");
@@ -120,46 +120,46 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         task.getGitRepositorySshPassphrase().set("passphrase");
         assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
     }
-    
+
     @Test
     public void testKeyAndKeyFile() {
         task.getGitRepositorySshPrivateKey().set("key");
         task.getGitRepositorySshPrivateKeyFile().set(new File("build.gradle"));
         assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
     }
-    
+
     @Test
     public void testPassphraseWithNoKey() {
         task.getGitRepositorySshPassphrase().set("passphrase");
         assertThrows(IllegalStateException.class, () -> task.releaseTaskAction());
     }
-    
+
     @Test
     void testUsernamePassword() throws Exception {
         task.getGitRepositoryUsername().set("user");
         task.getGitRepositoryPassword().set("pw");
-        task.releaseTaskAction();        
-        
+        task.releaseTaskAction();
+
         verify(pushCommand).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
         verify(pushCommand, never()).setTransportConfigCallback(any());
         verifyResults("0.0.3-SNAPSHOT");
     }
-    
+
     @Test
     void testPrivateKey() throws Exception {
         task.getGitRepositorySshPrivateKey().set("key");
-        task.releaseTaskAction();        
-        
+        task.releaseTaskAction();
+
         verify(pushCommand, never()).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
         verify(pushCommand).setTransportConfigCallback(any());
         verifyResults("0.0.3-SNAPSHOT");
     }
-    
+
     @Test
     void testPrivateKeyFile() throws Exception {
         task.getGitRepositorySshPrivateKeyFile().set(new File("build.gradle"));
-        task.releaseTaskAction();        
-        
+        task.releaseTaskAction();
+
         verify(pushCommand, never()).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
         verify(pushCommand).setTransportConfigCallback(any());
         verifyResults("0.0.3-SNAPSHOT");
