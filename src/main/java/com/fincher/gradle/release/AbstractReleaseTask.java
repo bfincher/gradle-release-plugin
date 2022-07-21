@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -45,6 +46,7 @@ public abstract class AbstractReleaseTask extends DefaultTask {
     protected Git git;
     protected VersionFile version;
     protected String relativeVersionFile;
+    protected java.util.Optional<CredentialsProvider> credentialsProvider;
     private JGitRepoFactory repoFactory;
     private JGitFactory gitFactory;
 

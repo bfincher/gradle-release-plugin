@@ -31,6 +31,14 @@ public class ReleasePlugin implements Plugin<Project> {
             setTaskPropertyFromExtension(extension.getVersionFile(), task::getVersionFile);
             setTaskPropertyFromExtension(extension.getVersionKeyValue(), task::getVersionKeyValue);
             setTaskPropertyFromExtension(extension.getRequiredBranchRegex(), task::getRequiredBranchRegex);
+            setTaskPropertyFromExtension(extension.getGitRepositoryUsername(), task::getGitRepositoryUsername);
+            setTaskPropertyFromExtension(extension.getGitRepositoryPassword(), task::getGitRepositoryPassword);
+            setTaskPropertyFromExtension(extension.getGitRepositorySshPrivateKey(),
+                    task::getGitRepositorySshPrivateKey);
+            setTaskPropertyFromExtension(extension.getGitRepositorySshPrivateKeyFile(),
+                    task::getGitRepositorySshPrivateKeyFile);
+            setTaskPropertyFromExtension(extension.getGitRepositorySshPassphrase(),
+                    task::getGitRepositorySshPassphrase);
             task.setGroup("Publishing");
         });
     }

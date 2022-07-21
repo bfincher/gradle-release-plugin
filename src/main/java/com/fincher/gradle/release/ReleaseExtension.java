@@ -21,4 +21,19 @@ public abstract class ReleaseExtension {
     @Input
     abstract Property<String> getTagPrefix();
 
+    @Input
+    abstract Property<String> getGitRepositoryUsername();
+
+    @Input
+    abstract Property<String> getGitRepositoryPassword();
+
+    @Input
+    abstract Property<String> getGitRepositorySshPrivateKey();
+
+    @InputFile
+    abstract Property<File> getGitRepositorySshPrivateKeyFile();
+
+    @Input
+    abstract Property<String> getGitRepositorySshPassphrase();
+
 }
