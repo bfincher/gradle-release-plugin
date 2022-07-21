@@ -1,3 +1,22 @@
+// buildscript can be removed once gradle-release plugin is approved by grdle
+buildscript {
+    repositories {
+        mavenLocal()
+        if (project.hasProperty('localNexus')) {
+            maven {
+                url "${localNexus}"
+                allowInsecureProtocol = true
+            }
+        } else {
+            mavenCentral()
+        }
+    }
+
+    dependencies {
+        classpath 'com.fincher:gradle-release:0.0.3'
+    }
+}
+
 plugins {
     id 'java-gradle-plugin'
     id 'maven-publish'
@@ -5,6 +24,7 @@ plugins {
     id "com.diffplug.spotless" version "6.7.2"
     id 'checkstyle'
     id 'com.gradle.plugin-publish' version '1.0.0'
+//    id 'com.fincher.release' version '0.0.2'
 }
 
 group = 'com.fincher'

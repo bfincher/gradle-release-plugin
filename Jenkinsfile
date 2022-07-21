@@ -25,25 +25,34 @@ pipeline {
       steps {
         script {
           def releaseOptionCount = 0;
+          def prepareReleaseOptions = "";
+          
           if (params.majorRelease) {
             performRelease = true
+            prepareReleaseOptions = "--releaseType MAJOR"
             releaseOptionCount++
           }
           if (params.minorRelease) {
             performRelease = true
+            prepareReleaseOptions = "--releaseType MINOR"
             releaseOptionCount++
           }
           if (params.patchRelease) {
             performRelease = true
+            prepareReleaseOptions = "--releaseType PATCH"
             releaseOptionCount++
           }
 
-          if (releaseOptionCount > 0) {
+          if (releaseOptionCount > 1) {
             error("Only one of major, minor, or patch release options can be selected")
           }
 
           if (!params.extraGradleOpts.isEmpty()) {
             gradleOpts = gradleOpts + extraGradleOpts
+          }
+          
+          if (performRelease) {
+            sh './gradlew prepareRelease ' + $prepareReleaseOptions + ' ' + gradleOpts 
           }
         }
       }
@@ -53,6 +62,16 @@ pipeline {
       steps {
         sh './gradlew clean build ' + gradleOpts
       }
+    }
+    
+    stage('Finalize') {
+        steps {
+          script {
+            if (performRelease) {
+			  sh './gradlew finalizeRelease ' + gradleOpts
+            }
+          }
+        }
     }
   }
 }

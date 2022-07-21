@@ -24,12 +24,14 @@ public class ReleasePlugin implements Plugin<Project> {
             setTaskPropertyFromExtension(extension.getVersionKeyValue(), task::getVersionKeyValue);
             setTaskPropertyFromExtension(extension.getRequiredBranchRegex(), task::getRequiredBranchRegex);
             setTaskPropertyFromExtension(extension.getTagPrefix(), task::getTagPrefix);
+            task.setGroup("Publishing");
         });
 
         project.getTasks().register("finalizeRelease", FinalizeReleaseTask.class, task -> {
             setTaskPropertyFromExtension(extension.getVersionFile(), task::getVersionFile);
             setTaskPropertyFromExtension(extension.getVersionKeyValue(), task::getVersionKeyValue);
             setTaskPropertyFromExtension(extension.getRequiredBranchRegex(), task::getRequiredBranchRegex);
+            task.setGroup("Publishing");
         });
     }
 }
