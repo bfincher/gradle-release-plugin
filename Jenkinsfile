@@ -67,8 +67,11 @@ pipeline {
     stage('Finalize') {
         steps {
           script {
-            if (performRelease) {
-			  sh './gradlew finalizeRelease ' + gradleOpts
+            withCredentials([sshUserPrivateKey(credentialsId: "bfincher_git_private_key", keyFileVariable: 'keyfile')]) {
+              if (performRelease) {
+                sh 'echo keyfile = ${keyfile}'
+			    sh './gradlew finalizeRelease -PsshKeyFile=${keyfile}' + gradleOpts
+              }
             }
           }
         }
