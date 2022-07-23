@@ -62,10 +62,6 @@ release {
 }
 
 tasks.named("finalizeRelease") {
-    println("Hello World")
-    doLast {
-        println("Output = " + standardOutput.toString())
-    }
     /*
     def taskOutput = StringBuilder()
     logging.addStandardOutputListener { taskOutput.append(it) }
