@@ -7,6 +7,7 @@ import org.eclipse.jgit.api.GitCommand;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.Transport;
@@ -97,7 +98,10 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
 
         String newVersion = version.toString();
         git.commit().setMessage(String.format("\"Set version after release to %s\"", newVersion)).call();
-        executeTransportCommand(git.push().setPushTags());
+        Iterable<PushResult> result = executeTransportCommand(git.push().setPushTags());
+        
+        result.forEach(r -> r.getMessages());
+        
     }
 
     @SuppressWarnings("rawtypes")
