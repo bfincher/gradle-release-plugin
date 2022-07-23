@@ -56,27 +56,6 @@ release {
   if (project.hasProperty('sshKeyFile')) {
     gitRepositorySshPrivateKeyFile = file("${sshKeyFile}")
   }
-  
-  // temporary.  remove this
-  requiredBranchRegex = 'publish'
-}
-
-tasks.named("finalizeRelease") {
-    /*
-    def taskOutput = StringBuilder()
-    logging.addStandardOutputListener { taskOutput.append(it) }
-    doLast {
-        // Usage of taskOutput must be in doLast, after all other task actions have been done.
-        // Be careful: if there's another `doLast {}` added after this, the output from that won't be considered.
-        if ("warning:" in taskOutput) {
-            throw Exception(
-                """
-                There was a problem executing foo, please fix.
-                """.trimIndent()
-            )
-        }
-    }
-    */
 }
 
 sourceSets {
