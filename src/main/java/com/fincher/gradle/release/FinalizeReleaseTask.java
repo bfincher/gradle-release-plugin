@@ -95,6 +95,8 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         version.save();
 
         git.add().addFilepattern(relativeVersionFile).call();
+        
+        getProject().getLogger().lifecycle("Hello1");
 
         String newVersion = version.toString();
         git.commit().setMessage(String.format("\"Set version after release to %s\"", newVersion)).call();
