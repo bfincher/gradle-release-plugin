@@ -21,6 +21,7 @@ import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.provider.Property;
@@ -43,6 +44,8 @@ abstract class BaseReleaseTaskTest<T extends AbstractReleaseTask> {
 
     @Mock
     Repository repo;
+    @Mock
+    StoredConfig repoConfig;
     @Mock
     Git git;
     @Mock
@@ -92,6 +95,7 @@ abstract class BaseReleaseTaskTest<T extends AbstractReleaseTask> {
         when(status.hasUncommittedChanges()).thenReturn(false);
 
         when(repo.getBranch()).thenReturn("master");
+        when(repo.getConfig()).thenReturn(repoConfig);
 
         when(git.add()).thenReturn(addCommand);
         when(addCommand.addFilepattern(anyString())).thenReturn(addCommand);

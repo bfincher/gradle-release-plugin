@@ -2,12 +2,14 @@ package com.fincher.gradle.release;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import org.eclipse.jgit.api.GitCommand;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.lib.ConfigConstants;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.Transport;
@@ -97,10 +99,16 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         git.add().addFilepattern(relativeVersionFile).call();
 
         String newVersion = version.toString();
-        git.commit().setMessage(String.format("\"Sett version after release to %s\"", newVersion)).call();
-        
-        getProject().getLogger().lifecycle(repo.getRemoteNames().toString());
-        executeTransportCommand(git.push().setPushTags().setRemote(repo.getBranch()));
+        git.commit().setMessage(String.format("\"Set version after release to %s\"", newVersion)).call();
+
+        StoredConfig config = repo.getConfig();
+        Objects.requireNonNull(config, "config is null");
+        String branch = repo.getBranch();
+        config.setString(ConfigConstants.CONFIG_BRANCH_SECTION, branch, "remote", "origin");
+        config.setString(ConfigConstants.CONFIG_BRANCH_SECTION, branch, "merge", "refs/heads/" + branch);
+        config.save();
+
+        executeTransportCommand(git.push().setPushTags());
     }
 
     @SuppressWarnings("rawtypes")
