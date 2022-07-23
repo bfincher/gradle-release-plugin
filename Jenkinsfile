@@ -52,7 +52,7 @@ pipeline {
           }
           
           if (performRelease) {
-            sh './gradlew prepareRelease ' + $prepareReleaseOptions + ' ' + gradleOpts 
+            sh './gradlew prepareRelease ' + prepareReleaseOptions + ' ' + gradleOpts 
           }
         }
       }
