@@ -95,16 +95,11 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         version.save();
 
         git.add().addFilepattern(relativeVersionFile).call();
-        
-        getProject().getLogger().lifecycle("Hello1");
 
         String newVersion = version.toString();
         git.commit().setMessage(String.format("\"Sett version after release to %s\"", newVersion)).call();
-        Iterable<PushResult> result = executeTransportCommand(git.push().setPushTags());
-
-        getProject().getLogger().lifecycle("Hello");
-        result.forEach(r -> getLogger().lifecycle(r.getMessages()));
-
+        
+        executeTransportCommand(git.push().setPushTags().setRemote(repo.getBranch()));
     }
 
     @SuppressWarnings("rawtypes")
