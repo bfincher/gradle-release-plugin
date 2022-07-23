@@ -99,6 +99,7 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         String newVersion = version.toString();
         git.commit().setMessage(String.format("\"Sett version after release to %s\"", newVersion)).call();
         
+        getProject().getLogger().lifecycle(repo.getRemoteNames().toString());
         executeTransportCommand(git.push().setPushTags().setRemote(repo.getBranch()));
     }
 
