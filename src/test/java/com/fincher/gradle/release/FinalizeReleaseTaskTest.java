@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -140,7 +141,7 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         task.getGitRepositoryPassword().set("pw");
         task.releaseTaskAction();
 
-        verify(pushCommand).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
+        verify(pushCommand, times(2)).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
         verify(pushCommand, never()).setTransportConfigCallback(any());
         verifyResults("0.0.3-SNAPSHOT");
     }
@@ -151,7 +152,7 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         task.releaseTaskAction();
 
         verify(pushCommand, never()).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
-        verify(pushCommand).setTransportConfigCallback(any());
+        verify(pushCommand, times(2)).setTransportConfigCallback(any());
         verifyResults("0.0.3-SNAPSHOT");
     }
 
@@ -161,7 +162,7 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         task.releaseTaskAction();
 
         verify(pushCommand, never()).setCredentialsProvider(any(UsernamePasswordCredentialsProvider.class));
-        verify(pushCommand).setTransportConfigCallback(any());
+        verify(pushCommand, times(2)).setTransportConfigCallback(any());
         verifyResults("0.0.3-SNAPSHOT");
     }
 
@@ -176,9 +177,9 @@ class FinalizeReleaseTaskTest extends BaseReleaseTaskTest<FinalizeReleaseTask> {
         verify(commitCommand).setMessage(String.format("\"Set version after release to %s\"", expectedVersion));
         verify(commitCommand).call();
 
-        verify(git).push();
+        verify(git, times(2)).push();
         verify(pushCommand).setPushTags();
-        verify(pushCommand).call();
+        verify(pushCommand, times(2)).call();
     }
 
 }

@@ -105,6 +105,7 @@ abstract class BaseReleaseTaskTest<T extends AbstractReleaseTask> {
 
         when(git.push()).thenReturn(pushCommand);
         when(pushCommand.setPushTags()).thenReturn(pushCommand);
+        when(pushCommand.setForce(anyBoolean())).thenReturn(pushCommand);
 
         when(git.tag()).thenReturn(tagCommand);
         when(tagCommand.setMessage(anyString())).thenReturn(tagCommand);

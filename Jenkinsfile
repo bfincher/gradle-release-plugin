@@ -48,7 +48,7 @@ pipeline {
           }
 
           if (!params.extraGradleOpts.isEmpty()) {
-            gradleOpts = gradleOpts + extraGradleOpts
+            gradleOpts = gradleOpts + " " + extraGradleOpts
           }
           
           if (performRelease) {

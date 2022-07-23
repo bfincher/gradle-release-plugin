@@ -2,20 +2,26 @@ package com.fincher.gradle.release;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 
 import org.eclipse.jgit.api.GitCommand;
+import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.Transport;
+import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.ssh.jsch.JschConfigSessionFactory;
 import org.eclipse.jgit.util.FS;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
@@ -108,7 +114,20 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         config.setString(ConfigConstants.CONFIG_BRANCH_SECTION, branch, "merge", "refs/heads/" + branch);
         config.save();
 
-        executeTransportCommand(git.push().setPushTags());
+        executePushCommand(git.push());
+        executePushCommand(git.push().setPushTags().setForce(true));
+    }
+
+    protected Iterable<PushResult> executePushCommand(PushCommand command) throws GitAPIException, IOException {
+        Iterable<PushResult> pushResult = executeTransportCommand(command);
+        Logger logger = getLogger();
+        String branch = repo.getBranch();
+        pushResult.forEach(result -> logger.lifecycle("Pushed {} {} branch: {} updates: {}",
+                result.getMessages(),
+                result.getURI(),
+                branch,
+                result.getRemoteUpdates()));
+        return pushResult;
     }
 
     @SuppressWarnings("rawtypes")
@@ -147,6 +166,11 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
             @Override
             protected JSch createDefaultJSch(FS fs) throws JSchException {
                 JSch defaultJSch = super.createDefaultJSch(fs);
+                try {
+                    defaultJSch.setKnownHosts(getSshKey());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
 
                 if (privateKeyFile != null) {
                     if (passphrase == null) {
@@ -174,7 +198,32 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
             }
         });
 
+        JSch.setConfig("StrictHostKeyChecking", "no");
+
         return command.call();
+    }
+
+    private InputStream getSshKey() throws IOException, GitAPIException, InterruptedException {
+        java.util.Optional<URIish> uri =
+                git.remoteList().call().stream()
+                        .filter(remote -> remote.getName().equals("origin"))
+                        .map(RemoteConfig::getURIs)
+                        .map(list -> list.iterator().next())
+                        .findFirst();
+
+        if (uri.isPresent()) {
+            uri.get().getHost();
+            final String[] keyscanCommand = { "ssh-keyscan", uri.get().getHost() };
+            final Process p = new ProcessBuilder(keyscanCommand).start();
+            p.waitFor();
+            if (p.exitValue() == 0) {
+                return p.getInputStream();
+            } else {
+                throw new RuntimeException("Bad return code from ssh-keyscan");
+            }
+        } else {
+            throw new RuntimeException("Unable to find remote host");
+        }
     }
 
     private void validateRepositoryAuthenticationParams() throws IOException {
