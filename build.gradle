@@ -56,6 +56,9 @@ release {
   if (project.hasProperty('sshKeyFile')) {
     gitRepositorySshPrivateKeyFile = file("${sshKeyFile}")
   }
+  
+  // temporary.  remove this
+  requiredBranchRegex = 'publish'
 }
 
 sourceSets {
