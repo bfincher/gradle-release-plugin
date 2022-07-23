@@ -100,7 +100,7 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         git.commit().setMessage(String.format("\"Set version after release to %s\"", newVersion)).call();
         Iterable<PushResult> result = executeTransportCommand(git.push().setPushTags());
 
-        result.forEach(r -> r.getMessages());
+        result.forEach(r -> System.out.println(r.getMessages()));
 
     }
 
