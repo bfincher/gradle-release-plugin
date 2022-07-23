@@ -61,6 +61,7 @@ release {
   requiredBranchRegex = 'publish'
 }
 
+/*
 tasks.named("finalizeRelease") {
     def taskOutput = StringBuilder()
     logging.addStandardOutputListener { taskOutput.append(it) }
@@ -76,6 +77,7 @@ tasks.named("finalizeRelease") {
         }
     }
 }
+*/
 
 sourceSets {
 	functionalTest {
