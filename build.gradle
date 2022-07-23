@@ -1,17 +1,47 @@
+// buildscript can be removed once gradle-release plugin is approved by grdle
+buildscript {
+    repositories {
+        mavenLocal()
+        if (project.hasProperty('localNexus')) {
+            maven {
+                url "${localNexus}"
+                allowInsecureProtocol = true
+            }
+        } else {
+            mavenCentral()
+        }
+    }
+
+    dependencies {
+        classpath 'com.fincher:gradle-release:0.0.5-SNAPSHOT'
+    }
+}
+
 plugins {
     id 'java-gradle-plugin'
     id 'maven-publish'
 	id "eclipse"
     id "com.diffplug.spotless" version "6.7.2"
     id 'checkstyle'
+    id 'com.gradle.plugin-publish' version '1.0.0'
 }
 
+apply plugin: 'com.fincher.release'
+
 group = 'com.fincher'
+
+pluginBundle {
+  website = 'https://github.com/bfincher/gradle-release-plugin'
+  vcsUrl = 'https://github.com/bfincher/gradle-release-plugin'
+  tags = ['release']
+}
 
 gradlePlugin {
 	plugins {
 		release {
-			id = "release"
+			id = "com.fincher.release"
+            displayName = 'Gradle release plugin'
+            description = 'A plugin to perform a release in 2 phases.  Allowing for a tag and publish to be performed before the new version is set'
 			implementationClass = "com.fincher.gradle.release.ReleasePlugin"
 		}
 	}
@@ -20,6 +50,12 @@ java {
 	toolchain {
     	languageVersion = JavaLanguageVersion.of(11)
 	}
+}
+
+release {
+  if (project.hasProperty('sshKeyFile')) {
+    gitRepositorySshPrivateKeyFile = file("${sshKeyFile}")
+  }
 }
 
 sourceSets {
@@ -69,10 +105,12 @@ configurations.functionalTestImplementation.extendsFrom(configurations.testImple
 
 dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:6.2.0.202206071550-r'
+    implementation 'com.google.guava:guava:31.1-jre'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     testImplementation 'org.mockito:mockito-core:4.6.1'
-    testImplementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.google.guava:guava:31.1-jre'
     functionalTestImplementation 'com.google.guava:guava:31.1-jre'
 }
 

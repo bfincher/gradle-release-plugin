@@ -56,7 +56,7 @@ class TestReleasePluginFunctionalTest {
         runner = initRunner();
 
         Files.writeString(settingsFile, "");
-        Files.writeString(buildFile, "plugins {" + "  id('release')" + "}");
+        Files.writeString(buildFile, "plugins {" + "  id('com.fincher.release')" + "}");
         Files.writeString(gradlePropertiesFile, versionKeyValue + " = 0.0.1-SNAPSHOT");
 
         gitAddInitialFiles(git);
@@ -125,7 +125,7 @@ class TestReleasePluginFunctionalTest {
     void testVersionFileOverride() throws IOException, GitAPIException {
         versionFile = buildFile;
 
-        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('release')", "}", "", "release {",
+        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('com.fincher.release')", "}", "", "release {",
                 "    versionFile = file('build.gradle')", "}", "", "version='0.0.1'"));
 
         gitAddAndCommit(versionFile.getFileName().toString(), "update build.gradle to have version");
@@ -144,7 +144,7 @@ class TestReleasePluginFunctionalTest {
         Files.writeString(gradlePropertiesFile, versionKeyValue + " = 0.0.1");
         gitAddAndCommit("gradle.properties", "use different version key");
 
-        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('release')", "}", "", "release {",
+        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('com.fincher.release')", "}", "", "release {",
                 "    versionKeyValue = 'otherVersionKey'", "}"));
         gitAddAndCommit("build.gradle", "update build.gradle to have version");
 
@@ -157,7 +157,7 @@ class TestReleasePluginFunctionalTest {
 
     @Test
     void testPrepareReleaseWithUncommitedChanges() throws IOException {
-        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('release')", "}", "", "release {",
+        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('com.fincher.release')", "}", "", "release {",
                 "    versionFile = file('build.gradle')", "}", "", "version='0.0.1'"));
 
         BuildResult result = runWithArgumentsAndFail("prepareRelease", "--releaseType", "MAJOR");
@@ -166,7 +166,7 @@ class TestReleasePluginFunctionalTest {
 
     @Test
     void testFinalizeReleaseWithUncommitedChanges() throws IOException {
-        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('release')", "}", "", "release {",
+        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('com.fincher.release')", "}", "", "release {",
                 "    versionFile = file('build.gradle')", "}", "", "version='0.0.1'"));
 
         BuildResult result = runWithArgumentsAndFail("finalizeRelease");
@@ -188,7 +188,7 @@ class TestReleasePluginFunctionalTest {
     void testBranchOverride(String branchName) throws IOException, GitAPIException {
         git.checkout().setCreateBranch(true).setName(branchName).call();
 
-        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('release')", "}", "", "release {",
+        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('com.fincher.release')", "}", "", "release {",
                 "    requiredBranchRegex = '^(other1)|(other2)$'", "}"));
         gitAddAndCommit("build.gradle", "update build.gradle to have version");
 
@@ -219,7 +219,7 @@ class TestReleasePluginFunctionalTest {
 
     @Test
     void testTagPrefixOverride() throws IOException, GitAPIException {
-        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('release')", "}", "", "release {",
+        Files.write(buildFile, Lists.newArrayList("plugins {", "  id('com.fincher.release')", "}", "", "release {",
                 "    tagPrefix = 'tagPrefix'", "}"));
         gitAddAndCommit("build.gradle", "update build.gradle to tag prefix");
 
