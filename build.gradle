@@ -72,6 +72,7 @@ repositories {
     if (project.hasProperty('localNexus')) {
         maven {
             url "${localNexus}"
+            allowInsecureProtocol = true
         }
     } else {
         mavenCentral()
