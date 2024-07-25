@@ -20,7 +20,7 @@ class VersionFile {
     static final String PATCH_GROUP = "patch";
     static final String SUFFIX_GROUP = "suffix";
 
-    static final String versionPatternStr = String.format(
+    static final String VERSION_PATTERN_STR = String.format(
             "(?<%s>[\'\"]?(?<%s>\\d+)\\.(?<%s>\\d+)\\.(?<%s>\\d+)(?<%s>[a-zA-Z0-9_-]*)[\'\"]?)", VERSION_GROUP,
             MAJOR_GROUP, MINOR_GROUP, PATCH_GROUP, SUFFIX_GROUP);
 
@@ -33,29 +33,29 @@ class VersionFile {
     private String patch;
     private String suffix;
 
-    private VersionFile(Path file, Pattern pattern, List<String> fileContent, int fileContentIndex, String major,
-            String minor, String patch, String suffix) {
+    private VersionFile(Path file, Pattern pattern, List<String> fileContent, int fileContentIndex,
+            SemanticVersion version, String suffix) {
         this.file = file;
         this.pattern = pattern;
         this.fileContent = fileContent;
         this.fileContentIndex = fileContentIndex;
-        this.major = major;
-        this.minor = minor;
-        this.patch = patch;
+        this.major = version.major;
+        this.minor = version.minor;
+        this.patch = version.patch;
         this.suffix = suffix;
     }
 
     static VersionFile load(Project project, Property<File> fileProperty, Property<String> versionKeyValue)
             throws IOException {
         Path file = fileProperty.getOrElse(new File(project.getProjectDir(), "gradle.properties")).toPath();
-        return load(file, versionKeyValue.getOrElse("version"));
+        return load(file, versionKeyValue.getOrElse(VERSION_GROUP));
     }
 
     static VersionFile load(Path file, String versionKeyValue) throws IOException {
         List<String> fileContent = Files.readAllLines(file);
 
         String versionLinePatternStr = String.format("(?<%s>\\s*%s\\s*=\\s*)%s", VERSION_PREFIX_GROUP, versionKeyValue,
-                versionPatternStr);
+                VERSION_PATTERN_STR);
         Pattern pattern = Pattern.compile(versionLinePatternStr);
 
         int lineIndex = -1;
@@ -83,7 +83,7 @@ class VersionFile {
             throw new IllegalStateException("Unable to parse the version");
         }
 
-        return new VersionFile(file, pattern, fileContent, lineIndex, major, minor, patch, suffix);
+        return new VersionFile(file, pattern, fileContent, lineIndex, new SemanticVersion(major, minor, patch), suffix);
     }
 
     String getMajor() {
@@ -147,4 +147,16 @@ class VersionFile {
         fileContent.set(fileContentIndex, line);
     }
 
+    private static class SemanticVersion {
+        private final String major;
+        private final String minor;
+        private final String patch;
+
+        SemanticVersion(String major, String minor, String patch) {
+            this.major = major;
+            this.minor = minor;
+            this.patch = patch;
+        }
+
+    }
 }

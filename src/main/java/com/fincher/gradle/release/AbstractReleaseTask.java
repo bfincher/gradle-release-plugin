@@ -52,7 +52,7 @@ public abstract class AbstractReleaseTask extends DefaultTask {
 
     AbstractReleaseTask() {
         repoFactory = this::initGitRepo;
-        gitFactory = (repo) -> new Git(repo);
+        gitFactory = Git::new;
     }
 
     /**
@@ -141,7 +141,7 @@ public abstract class AbstractReleaseTask extends DefaultTask {
         }
 
         if (gitDir == null) {
-            System.err.println("Unable to find .git directory");
+            getProject().getLogger().error("Unable to find .git directory");
             throw new GradleException("Unable to find .git directory");
         }
 
@@ -149,11 +149,11 @@ public abstract class AbstractReleaseTask extends DefaultTask {
     }
 
     protected void overrideVersion(String versionOverride) {
-        Pattern p = Pattern.compile(VersionFile.versionPatternStr);
+        Pattern p = Pattern.compile(VersionFile.VERSION_PATTERN_STR);
         Matcher m = p.matcher(versionOverride);
         if (!m.find()) {
             String errorMsg = String.format("The version of %s does not match the pattern %s", versionOverride,
-                    VersionFile.versionPatternStr);
+                    VersionFile.VERSION_PATTERN_STR);
             throw new IllegalArgumentException(errorMsg);
         }
 
@@ -170,7 +170,6 @@ public abstract class AbstractReleaseTask extends DefaultTask {
     protected static void verifyNoUncommitedChanges(Git git) throws GitAPIException {
         Status status = git.status().call();
         if (status.hasUncommittedChanges()) {
-            System.err.println("Unable to release with uncommitted changes");
             throw new IllegalStateException("Unable to release with uncommitted changes");
         }
     }

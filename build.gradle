@@ -20,10 +20,11 @@ buildscript {
 plugins {
     id 'java-gradle-plugin'
     id 'maven-publish'
-	id "eclipse"
+    id "eclipse"
     id "com.diffplug.spotless" version "6.7.2"
     id 'checkstyle'
     id 'com.gradle.plugin-publish' version '1.0.0'
+    id 'name.remal.sonarlint' version '4.2.6'
 }
 
 apply plugin: 'com.fincher.release'
@@ -138,3 +139,6 @@ spotless {
         eclipse('4.19.0').configFile('config/eclipse_format.xml')
     }
 }
+
+tasks.named('sonarlintFunctionalTest') {enabled = false}
+tasks.named('sonarlintTest') {enabled = false}

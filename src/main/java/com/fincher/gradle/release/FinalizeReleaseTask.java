@@ -8,15 +8,12 @@ import java.util.Objects;
 import org.eclipse.jgit.api.GitCommand;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.TransportCommand;
-import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
-import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.ssh.jsch.JschConfigSessionFactory;
@@ -132,7 +129,7 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
 
     @SuppressWarnings("rawtypes")
     protected <T> T executeTransportCommand(TransportCommand<? extends GitCommand, T> command)
-            throws GitAPIException, IOException {
+            throws GitAPIException {
 
         if (getGitRepositorySshPrivateKey().isPresent() || getGitRepositorySshPrivateKeyFile().isPresent()) {
             return executeTransportCommandSsh(command);
@@ -148,54 +145,12 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
 
     @SuppressWarnings("rawtypes")
     protected <T> T executeTransportCommandSsh(TransportCommand<? extends GitCommand, T> command)
-            throws GitAPIException, IOException {
+            throws GitAPIException {
+        CustomSshSessionFactory sshSessionFactory = new CustomSshSessionFactory();
 
-        final String privateKeyFile;
-        final byte[] privateKey;
-        String passphrase = getGitRepositorySshPassphrase().getOrNull();
-
-        if (getGitRepositorySshPrivateKeyFile().isPresent()) {
-            privateKeyFile = getGitRepositorySshPrivateKeyFile().get().toPath().toString();
-            privateKey = null;
-        } else {
-            privateKey = getGitRepositorySshPrivateKey().get().getBytes();
-            privateKeyFile = null;
-        }
-
-        SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
-            @Override
-            protected JSch createDefaultJSch(FS fs) throws JSchException {
-                JSch defaultJSch = super.createDefaultJSch(fs);
-                try {
-                    defaultJSch.setKnownHosts(getSshKey());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
-                if (privateKeyFile != null) {
-                    if (passphrase == null) {
-                        defaultJSch.addIdentity(privateKeyFile);
-                    } else {
-                        defaultJSch.addIdentity(privateKeyFile, passphrase);
-                    }
-                } else {
-                    if (passphrase == null) {
-                        defaultJSch.addIdentity("key", privateKey, (byte[]) null, null);
-                    } else {
-                        defaultJSch.addIdentity("key", privateKey, (byte[]) null, passphrase.getBytes());
-                    }
-                }
-
-                return defaultJSch;
-            }
-        };
-
-        command.setTransportConfigCallback(new TransportConfigCallback() {
-            @Override
-            public void configure(Transport transport) {
-                SshTransport sshTransport = (SshTransport) transport;
-                sshTransport.setSshSessionFactory(sshSessionFactory);
-            }
+        command.setTransportConfigCallback(transport -> {
+            SshTransport sshTransport = (SshTransport) transport;
+            sshTransport.setSshSessionFactory(sshSessionFactory);
         });
 
         JSch.setConfig("StrictHostKeyChecking", "no");
@@ -203,30 +158,7 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         return command.call();
     }
 
-    private InputStream getSshKey() throws IOException, GitAPIException, InterruptedException {
-        java.util.Optional<URIish> uri =
-                git.remoteList().call().stream()
-                        .filter(remote -> remote.getName().equals("origin"))
-                        .map(RemoteConfig::getURIs)
-                        .map(list -> list.iterator().next())
-                        .findFirst();
-
-        if (uri.isPresent()) {
-            uri.get().getHost();
-            final String[] keyscanCommand = { "ssh-keyscan", uri.get().getHost() };
-            final Process p = new ProcessBuilder(keyscanCommand).start();
-            p.waitFor();
-            if (p.exitValue() == 0) {
-                return p.getInputStream();
-            } else {
-                throw new RuntimeException("Bad return code from ssh-keyscan");
-            }
-        } else {
-            throw new RuntimeException("Unable to find remote host");
-        }
-    }
-
-    private void validateRepositoryAuthenticationParams() throws IOException {
+    private void validateRepositoryAuthenticationParams() {
         boolean isUsernameSet = getGitRepositoryUsername().isPresent();
         boolean isPasswordSet = getGitRepositoryPassword().isPresent();
         boolean isPrivateKeySet = getGitRepositorySshPrivateKey().isPresent();
@@ -236,12 +168,11 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         if (isUsernameSet) {
             Preconditions.checkState(isPasswordSet,
                     "Git repository username is set but not Git password");
-            Preconditions.checkState(!isPrivateKeySet,
-                    "Both username/password and SSH authentication parameters cannot be set");
-            Preconditions.checkState(!isPrivateKeyFileSet,
-                    "Both username/password and SSH authentication parameters cannot be set");
-            Preconditions.checkState(!isPrivateKeyPassphraseSet,
-                    "Both username/password and SSH authentication parameters cannot be set");
+            final String duplicateErrorMsg = "Both username/password and SSH authentication parameters cannot be set";
+
+            Preconditions.checkState(!isPrivateKeySet, duplicateErrorMsg);
+            Preconditions.checkState(!isPrivateKeyFileSet, duplicateErrorMsg);
+            Preconditions.checkState(!isPrivateKeyPassphraseSet, duplicateErrorMsg);
             return;
         } else {
             Preconditions.checkState(!isPasswordSet,
@@ -274,4 +205,74 @@ public abstract class FinalizeReleaseTask extends AbstractReleaseTask {
         }
     }
 
+    private class CustomSshSessionFactory extends JschConfigSessionFactory {
+
+        private final String privateKeyFile;
+        private final byte[] privateKey;
+        private final String passphrase;
+
+        CustomSshSessionFactory() {
+            passphrase = getGitRepositorySshPassphrase().getOrNull();
+
+            if (getGitRepositorySshPrivateKeyFile().isPresent()) {
+                privateKeyFile = getGitRepositorySshPrivateKeyFile().get().toPath().toString();
+                privateKey = null;
+            } else {
+                privateKey = getGitRepositorySshPrivateKey().get().getBytes();
+                privateKeyFile = null;
+            }
+        }
+
+        @Override
+        protected JSch createDefaultJSch(FS fs) throws JSchException {
+            JSch defaultJSch = super.createDefaultJSch(fs);
+            try {
+                defaultJSch.setKnownHosts(getSshKey());
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new JSchException(ie.getMessage(), ie);
+            } catch (IOException | GitAPIException e) {
+                throw new JSchException(e.getMessage(), e);
+            }
+
+            if (privateKeyFile != null) {
+                if (passphrase == null) {
+                    defaultJSch.addIdentity(privateKeyFile);
+                } else {
+                    defaultJSch.addIdentity(privateKeyFile, passphrase);
+                }
+            } else {
+                if (passphrase == null) {
+                    defaultJSch.addIdentity("key", privateKey, (byte[]) null, null);
+                } else {
+                    defaultJSch.addIdentity("key", privateKey, (byte[]) null, passphrase.getBytes());
+                }
+            }
+
+            return defaultJSch;
+        }
+
+        private InputStream getSshKey() throws IOException, GitAPIException, InterruptedException {
+            java.util.Optional<URIish> uri =
+                    git.remoteList().call().stream()
+                            .filter(remote -> remote.getName().equals("origin"))
+                            .map(RemoteConfig::getURIs)
+                            .map(list -> list.iterator().next())
+                            .findFirst();
+
+            if (uri.isPresent()) {
+                uri.get().getHost();
+                final String[] keyscanCommand = { "ssh-keyscan", uri.get().getHost() };
+                final Process p = new ProcessBuilder(keyscanCommand).start();
+                p.waitFor();
+                if (p.exitValue() == 0) {
+                    return p.getInputStream();
+                } else {
+                    throw new AssertionError("Bad return code from ssh-keyscan");
+                }
+            } else {
+                throw new AssertionError("Unable to find remote host");
+            }
+        }
+    }
 }
