@@ -13,7 +13,6 @@ function deleteLockIfExpired {
     if [ -f $1/.lock ]; then
         local lockTime=$(cat $1/.lock)
         local delta=`expr $currentTime - $lockTime`
-        echo "BKF delta = $delta"
         if (( delta > LOCK_EXPIRATION_SECONDS )); then
             rm $1/.lock
         fi
