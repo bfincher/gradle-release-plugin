@@ -1,5 +1,5 @@
 def performRelease = false
-def gradleOpts = "-s --build-cache -PlocalNexus=https://nexus.fincherhome.com/nexus/content/groups/public"
+def gradleOpts = "-s --build-cache -PlocalNexus=https://nexus.fincherhome.com/repository/public"
 def buildCacheDir = ""
 
 pipeline {
