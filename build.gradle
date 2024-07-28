@@ -130,7 +130,7 @@ tasks.named('check') {
    	dependsOn(tasks.functionalTest)
 }
 
-tasks.named('test') {
+test {
    	useJUnitPlatform()
 }
 
