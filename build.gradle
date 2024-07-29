@@ -20,10 +20,11 @@ buildscript {
 plugins {
     id 'java-gradle-plugin'
     id 'maven-publish'
-	id "eclipse"
+    id "eclipse"
     id "com.diffplug.spotless" version "6.7.2"
     id 'checkstyle'
     id 'com.gradle.plugin-publish' version '1.0.0'
+    id 'name.remal.sonarlint' version '4.2.6'
 }
 
 apply plugin: 'com.fincher.release'
@@ -72,6 +73,7 @@ repositories {
     if (project.hasProperty('localNexus')) {
         maven {
             url "${localNexus}"
+            allowInsecureProtocol = true
         }
     } else {
         mavenCentral()
@@ -123,12 +125,12 @@ tasks.register('functionalTest', Test) {
 
 gradlePlugin.testSourceSets(sourceSets.functionalTest)
 
-tasks.named('check') {
+check {
    	// Run the functional tests as part of `check`
    	dependsOn(tasks.functionalTest)
 }
 
-tasks.named('test') {
+test {
    	useJUnitPlatform()
 }
 
@@ -136,4 +138,12 @@ spotless {
     java {
         eclipse('4.19.0').configFile('config/eclipse_format.xml')
     }
+}
+
+sonarlintFunctionalTest {
+    enabled = false
+}
+
+sonarlintTest {
+    enabled = false
 }

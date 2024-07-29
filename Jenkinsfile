@@ -1,5 +1,5 @@
 def performRelease = false
-def gradleOpts = "-s --build-cache -PlocalNexus=https://nexus.fincherhome.com/nexus/content/groups/public"
+def gradleOpts = "-s --build-cache -PlocalNexus=http://nexus3:8081/repository/public"
 def buildCacheDir = ""
 
 pipeline {
@@ -98,6 +98,8 @@ pipeline {
   post {
     always {
       sh("src/main/resources/releaseBuildCache ${buildCacheDir}")
+      archiveArtifacts artifacts: 'build/reports/sonarlint/**/*'
+      junit 'build/test-results/**/*.xml'
     }
   }
 }

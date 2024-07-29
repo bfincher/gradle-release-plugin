@@ -22,7 +22,7 @@ import org.gradle.api.tasks.options.Option;
  */
 public abstract class PrepareReleaseTask extends AbstractReleaseTask {
 
-    static enum ReleaseType {
+    enum ReleaseType {
         MAJOR,
         MINOR,
         PATCH,
@@ -58,57 +58,52 @@ public abstract class PrepareReleaseTask extends AbstractReleaseTask {
     public void releaseTaskAction() throws IOException, GitAPIException {
         super.releaseTaskAction();
 
-        try {
-            switch (releaseType) {
-            case MAJOR:
-                String major = String.valueOf(Integer.parseInt(version.getMajor()) + 1);
-                version.replaceMajor(major);
-                version.replaceMinor("0");
-                version.replacePatch("0");
-                version.replaceSuffix("");
-                break;
+        switch (releaseType) {
+        case MAJOR:
+            String major = String.valueOf(Integer.parseInt(version.getMajor()) + 1);
+            version.replaceMajor(major);
+            version.replaceMinor("0");
+            version.replacePatch("0");
+            version.replaceSuffix("");
+            break;
 
-            case MINOR:
-                String minor = String.valueOf(Integer.parseInt(version.getMinor()) + 1);
-                version.replaceMinor(minor);
-                version.replacePatch("0");
-                version.replaceSuffix("");
-                break;
+        case MINOR:
+            String minor = String.valueOf(Integer.parseInt(version.getMinor()) + 1);
+            version.replaceMinor(minor);
+            version.replacePatch("0");
+            version.replaceSuffix("");
+            break;
 
-            case PATCH:
-                // If the current version is a snapshot, just remove the snapshot
-                if (!version.getSuffix().equals("-SNAPSHOT")) {
-                    String patch = String.valueOf(Integer.parseInt(version.getPatch()) + 1);
-                    version.replacePatch(patch);
-                }
-
-                version.replaceSuffix("");
-                break;
-
-            case MANUAL:
-                if (releaseVersionOverride == null) {
-                    throw new IllegalStateException("releaseVersion must be specified with a MANUAL release type");
-                }
-                overrideVersion(releaseVersionOverride);
-                break;
-
-            default:
-                throw new IllegalStateException();
+        case PATCH:
+            // If the current version is a snapshot, just remove the snapshot
+            if (!version.getSuffix().equals("-SNAPSHOT")) {
+                String patch = String.valueOf(Integer.parseInt(version.getPatch()) + 1);
+                version.replacePatch(patch);
             }
 
-            version.save();
+            version.replaceSuffix("");
+            break;
 
-            git.add().addFilepattern(relativeVersionFile).call();
+        case MANUAL:
+            if (releaseVersionOverride == null) {
+                throw new IllegalStateException("releaseVersion must be specified with a MANUAL release type");
+            }
+            overrideVersion(releaseVersionOverride);
+            break;
 
-            String newVersion = version.toString();
-            git.commit().setMessage(String.format("\"Set version for release to %s\"", newVersion)).call();
-
-            String tag = getTagPrefix().getOrElse("") + newVersion;
-            git.tag().setMessage(tag).setName(tag).setAnnotated(true).call();
-        } catch (GitAPIException e) {
-            throw new RuntimeException(e);
+        default:
+            throw new IllegalStateException();
         }
 
+        version.save();
+
+        git.add().addFilepattern(relativeVersionFile).call();
+
+        String newVersion = version.toString();
+        git.commit().setMessage(String.format("\"Set version for release to %s\"", newVersion)).call();
+
+        String tag = getTagPrefix().getOrElse("") + newVersion;
+        git.tag().setMessage(tag).setName(tag).setAnnotated(true).call();
     }
 
 }
