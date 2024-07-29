@@ -125,7 +125,7 @@ tasks.register('functionalTest', Test) {
 
 gradlePlugin.testSourceSets(sourceSets.functionalTest)
 
-tasks.named('check') {
+check {
    	// Run the functional tests as part of `check`
    	dependsOn(tasks.functionalTest)
 }
@@ -140,5 +140,10 @@ spotless {
     }
 }
 
-tasks.named('sonarlintFunctionalTest') {enabled = false}
-tasks.named('sonarlintTest') {enabled = false}
+sonarlintFunctionalTest {
+    enabled = false
+}
+
+sonarlintTest {
+    enabled = false
+}
