@@ -52,7 +52,7 @@ pipeline {
           }                         
   
           if (!params.extraGradleOpts.isEmpty()) {
-            gradleOpts = gradleOpts + " " + extraGradleOpts
+            gradleOpts = "${gradleOpts} ${params.extraGradleOpts}"
           }
 
           sh "git config --global user.email 'brian@fincherhome.com' && git config --global user.name 'Brian Fincher'"
