@@ -1,5 +1,6 @@
 def performRelease = false
-def gradleOpts = "-s --build-cache -PlocalNexus=http://nexus3:8081/repository/public"
+def baseNexusUrl = "http://nexus3:8081"
+def gradleOpts = "-s --build-cache -PlocalNexus=${baseNexusUrl}/repository/public"
 def buildCacheDir = ""
 
 pipeline {
@@ -77,10 +78,10 @@ pipeline {
           
           if (performRelease || params.publish ) {
             def publishParams = '-PpublishUsername=${publishUsername} -PpublishPassword=${publishPassword}'
-            publishParams += ' -PpublishSnapshotUrl=https://nexus.fincherhome.com/nexus/content/repositories/snapshots'
-            publishParams += ' -PpublishReleaseUrl=https://nexus.fincherhome.com/nexus/content/repositories/releases'
+            publishParams += " -PpublishSnapshotUrl=${baseNexusUrl}/repository/snapshots"
+            publishParams += ' -PpublishReleaseUrl=${baseNexusUrl}/repository/releases'
             withCredentials([usernamePassword(credentialsId: 'nexus.fincherhome.com', usernameVariable: 'publishUsername', passwordVariable: 'publishPassword')]) {
-              sh "gradle publish  ${publishParams} -s --build-cache -PlocalNexus=https://nexus.fincherhome.com/nexus/content/groups/public"
+              sh "gradle publish  ${gradleOpts} ${publishParams}"
             }
           }
 
