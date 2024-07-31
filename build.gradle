@@ -95,6 +95,8 @@ publishing {
                     url "${publishReleaseUrl}"
                 }
 
+                allowInsecureProtocol = true
+
                 authentication {
                     basic(BasicAuthentication)
                 }
