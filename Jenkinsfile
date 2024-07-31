@@ -24,9 +24,9 @@ pipeline {
           
           buildCacheDir = sh(
               script: "src/main/resources/getBuildCache ${params.baseBuildCacheDir} ${params.buildCacheName}",
-              returnStdout: true)
+              returnStdout: true).trim()
 
-          gradleOpts = gradleOpts + " --gradle-user-home " + buildCacheDir
+          gradleOpts = gradleOpts + " --gradle-user-home=" + buildCacheDir
 
           def releaseOptionCount = 0;
           def prepareReleaseOptions = "";
