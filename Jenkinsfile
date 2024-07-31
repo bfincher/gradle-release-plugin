@@ -79,7 +79,7 @@ pipeline {
           if (performRelease || params.publish ) {
             def publishParams = '-PpublishUsername=${publishUsername} -PpublishPassword=${publishPassword}'
             publishParams += " -PpublishSnapshotUrl=${baseNexusUrl}/repository/snapshots"
-            publishParams += ' -PpublishReleaseUrl=${baseNexusUrl}/repository/releases'
+            publishParams += " -PpublishReleaseUrl=${baseNexusUrl}/repository/releases"
             withCredentials([usernamePassword(credentialsId: 'nexus.fincherhome.com', usernameVariable: 'publishUsername', passwordVariable: 'publishPassword')]) {
               sh "gradle publish  ${gradleOpts} ${publishParams}"
             }
