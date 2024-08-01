@@ -94,7 +94,6 @@ public abstract class AbstractReleaseTask extends DefaultTask {
     public void releaseTaskAction() throws GitAPIException, IOException {
 
         Project project = getProject();
-        project.getLogger().warn("project properties = " + project.getProperties());
         Path projectDir = project.getProjectDir().toPath();
 
         version = VersionFile.load(getProject(), getVersionFile(), getVersionKeyValue());
