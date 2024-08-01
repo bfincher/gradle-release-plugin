@@ -106,7 +106,12 @@ public abstract class AbstractReleaseTask extends DefaultTask {
         verifyNoUncommitedChanges();
 
         String branch = repo.getBranch();
-        String branchPattern = getRequiredBranchRegex().getOrElse("^(master)|(main)$");
+        final String branchPattern;
+        if (getProject().getProperties().containsKey("requiredBranchRegex")) {
+            branchPattern = (String) getProject().getProperties().get("requiredBranchRegex");
+        } else {
+            branchPattern = getRequiredBranchRegex().getOrElse("^(master)|(main)$");
+        }
         if (!Pattern.compile(branchPattern).matcher(branch).matches()) {
             String errorMsg = String.format("Expected branch name to match pattern %s but was %s", branchPattern,
                     branch);
