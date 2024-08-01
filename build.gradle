@@ -13,7 +13,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.fincher:gradle-release:0.1.2-SNAPSHOT'
+        classpath 'com.fincher:gradle-release:0.1.2'
     }
 }
 
