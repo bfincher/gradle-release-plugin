@@ -31,12 +31,6 @@ apply plugin: 'com.fincher.release'
 
 group = 'com.fincher'
 
-pluginBundle {
-  website = 'https://github.com/bfincher/gradle-release-plugin'
-  vcsUrl = 'https://github.com/bfincher/gradle-release-plugin'
-  tags = ['release']
-}
-
 gradlePlugin {
 	plugins {
 		release {
@@ -49,7 +43,7 @@ gradlePlugin {
 }
 java {
 	toolchain {
-    	languageVersion = JavaLanguageVersion.of(11)
+    	languageVersion = JavaLanguageVersion.of(17)
 	}
 }
 
