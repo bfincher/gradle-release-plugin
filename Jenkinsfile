@@ -99,7 +99,6 @@ pipeline {
   post {
     always {
       sh("src/main/resources/releaseBuildCache ${buildCacheDir}")
-      archiveArtifacts artifacts: 'build/reports/sonarlint/**/*'
       junit 'build/test-results/**/*.xml'
     }
   }
