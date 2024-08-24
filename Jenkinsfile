@@ -4,7 +4,7 @@ def gradleOpts = "-s --build-cache -PlocalNexus=${baseNexusUrl}/repository/publi
 def buildCacheDir = ""
 
 pipeline {
-  agent { label 'gradle-8.10-jdk17' }
+  agent { label 'gradle-8.10-jdk11' }
 
   parameters {
     string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
