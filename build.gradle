@@ -102,14 +102,15 @@ publishing {
 configurations.functionalTestImplementation.extendsFrom(configurations.testImplementation)
 
 dependencies {
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:6.2.0.202206071550-r'
-    implementation 'com.google.guava:guava:31.1-jre'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    testImplementation 'org.mockito:mockito-core:4.6.1'
-    implementation 'com.google.guava:guava:31.1-jre'
-    functionalTestImplementation 'com.google.guava:guava:31.1-jre'
+    implementation libs.jgit
+    implementation libs.jgit.jsch
+    implementation libs.guava
+    testImplementation libs.junit5.api
+    testImplementation libs.junit5.params
+    testRuntimeOnly libs.junit5.engine
+    testImplementation libs.mockito
+    functionalTestImplementation libs.junit5.params
+    functionalTestImplementation libs.junit5.engine
 }
 
 // Add a task to run the functional tests
