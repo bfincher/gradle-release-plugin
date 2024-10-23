@@ -106,10 +106,12 @@ dependencies {
     implementation libs.guava
     testImplementation libs.junit5.api
     testImplementation libs.junit5.params
-    testRuntimeOnly libs.junit5.engine
     testImplementation libs.mockito
+    testRuntimeOnly libs.junit5.engine
+    testRuntimeOnly libs.junit5.launcher
     functionalTestImplementation libs.junit5.params
-    functionalTestImplementation libs.junit5.engine
+    functionalTestRuntimeOnly libs.junit5.engine
+    functionalTestRuntimeOnly libs.junit5.launcher
 }
 
 // Add a task to run the functional tests
